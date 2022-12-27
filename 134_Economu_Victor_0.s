@@ -39,6 +39,8 @@ matrix_mult:
 	
 	popl %ebp
 	ret
+	
+
 .globl main
 main:
 // Citim numarul cerintei:
