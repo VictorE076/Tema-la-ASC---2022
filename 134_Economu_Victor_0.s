@@ -21,6 +21,20 @@
 .text
 
 // Aceasta procedura stocheaza inmultirea matricelor patratice m1 si m2 in mres;
+//
+// 8(%ebp) = $m1
+// 12(%ebp) = $m2
+// 16(%ebp) = $mres
+// 20(%ebp) = n
+//
+//
+// -16(%ebp) = a
+// -20(%ebp) = b
+// -24(%ebp) = c
+// -28(%ebp) = vl
+// -32(%ebp) = m1[a][c]
+// -36(%ebp) = m2[c][b]
+//
 matrix_mult:
 	pushl %ebp
 	movl %esp, %ebp
@@ -28,10 +42,64 @@ matrix_mult:
 		pushl %ebx
 		pushl %esi
 		pushl %edi
+	
+		
+	subl $24, %esp
+	
+// a = b = c = vl = 0
+	movl $0, -16(%ebp)
+	movl $0, -20(%ebp)
+	movl $0, -24(%ebp)
+	movl $0, -28(%ebp)
+
+	xor %ecx, %ecx
+	xor %edx, %edx
+	
+// Efectuam inmultirea celor doua matrici:	
+for_a:
+	movl -16(%ebp), %ecx
+	cmp 20(%ebp), %ecx
+	je exit_for_a
+	
+	
+	movl $0, -20(%ebp)
+	for_b:
+		movl -20(%ebp), %ecx
+		cmp 20(%ebp), %ecx
+		je exit_for_b
 		
 		
-	////
+		// vl = 0;
+		movl $0, -28(%ebp)
+		xor %eax, %eax
 		
+		movl $0, -24(%ebp)
+		for_c:
+			movl -24(%ebp), %ecx
+			cmp 20(%ebp), %ecx
+			je exit_for_c
+			
+			
+			////
+			
+			
+			incl -24(%ebp)
+			jmp for_c
+		
+		exit_for_c:
+		
+		incl -20(%ebp)
+		jmp for_b
+		
+	exit_for_b:
+	
+	incl -16(%ebp)
+	jmp for_a
+
+exit_for_a:	
+		
+	addl $24, %esp
+	
 		
 		popl %edi
 		popl %esi
@@ -189,12 +257,103 @@ check_nr:
 CERINTA_2:
 
 /////	
+
+// Citim k = lungimea drumului:	
+	pushl $k
+	pushl $fscan
+	call scanf
+	addl $8, %esp
+	
+// Citim i = nodul sursa:
+	pushl $i
+	pushl $fscan
+	call scanf
+	addl $8, %esp
+	
+// Citim j = nodul destinatie:
+	pushl $j
+	pushl $fscan
+	call scanf
+	addl $8, %esp
+	
+// Copiem valorile din m1 in m2:
+	xor %ecx, %ecx
+	xor %edx, %edx
+	movl $0, ii
+	movl $0, jj
+	
+for_1_cpy:
+	movl ii, %ecx
+	cmp n, %ecx
+	je exit_for_1_cpy
+	
+	movl $0, jj
+	for_2_cpy:
+		movl jj, %ecx
+		cmp n, %ecx
+		je next_for_1_cpy
+		
+		
+		// Aflam pozitia index-ului in m1:
+		movl ii, %eax
+		xor %edx, %edx
+		mull n
+		addl jj, %eax
+		
+		// Mutam elementul m1[ii][jj] in m2[ii][jj]:
+		lea m1, %esi
+		movl (%esi, %eax, 4), %ebx
+		
+		lea m2, %esi
+		movl %ebx, (%esi, %eax, 4)
+		
+		
+		
+		incl jj
+		jmp for_2_cpy
+
+next_for_1_cpy:
+		
+	incl ii
+	jmp for_1_cpy
+
+
+exit_for_1_cpy:
+
+// Calculam efectiv matricea m1 ** k:
+for_k:
+	movl k, %ecx
+	cmp $1, %ecx
+	je exit_for_k
+	
+// Apelam functia matrix_mult care va calcula in mres, m1 * m2:
+		pushl %ebx
+		pushl %esi
+		pushl %edi
+	pushl n
+	pushl $mres
+	pushl $m2
+	pushl $m1
+	call matrix_mult
+	addl $16, %esp
+		pushl %edi
+		pushl %esi
+		pushl %ebx
+	
+	////
+
+	decl k
+	jmp for_k
+
+
+exit_for_k:
 	
 etexit:
 	movl $1, %eax
 	xor %ebx, %ebx
 	int $0x80
 
+// C.1
 
 /*	
 	pushl nr
@@ -219,4 +378,31 @@ etexit:
 	call fflush
 	addl $4, %esp
 		popl %ecx
-*/		
+*/	
+
+// C.2
+
+/*
+		pushl (%esi, %eax, 4)
+		pushl $fpr
+		call printf
+		addl $8, %esp
+		
+		pushl $0
+		call fflush
+		addl $4, %esp
+*/
+
+
+/*
+	pushl $fen
+	call printf
+	addl $4, %esp
+	
+	pushl $0
+	call fflush
+	addl $4, %esp
+*/
+
+
+			
