@@ -19,6 +19,26 @@
 	fen: .asciz "\n"
 	ftest: .asciz "%d\n"
 .text
+
+// Aceasta procedura stocheaza inmultirea matricelor patratice m1 si m2 in mres;
+matrix_mult:
+	pushl %ebp
+	movl %esp, %ebp
+	
+		pushl %ebx
+		pushl %esi
+		pushl %edi
+		
+		
+	////
+		
+		
+		popl %edi
+		popl %esi
+		popl %ebx
+	
+	popl %ebp
+	ret
 .globl main
 main:
 // Citim numarul cerintei:
