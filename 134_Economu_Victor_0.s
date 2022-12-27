@@ -17,7 +17,7 @@
 	fscan: .asciz "%d"
 	fpr: .asciz "%d "
 	fen: .asciz "\n"
-	ftest: .asciz "%d\n"
+	f2: .asciz "%d\n"
 .text
 
 // Aceasta procedura stocheaza inmultirea matricelor patratice m1 si m2 in mres;
@@ -35,6 +35,7 @@
 // -32(%ebp) = m1[a][c]
 // -36(%ebp) = m2[c][b]
 //
+//////////////////////////
 matrix_mult:
 	pushl %ebp
 	movl %esp, %ebp
@@ -80,13 +81,54 @@ for_a:
 			je exit_for_c
 			
 			
-			////
+			// Aflam pozitia a * n + c a elementului din m1;
+			movl -16(%ebp), %eax
+			xor %edx, %edx
+			mull 20(%ebp)
+			addl -24(%ebp), %eax
+			
+			// Stocam elementul intr-o variabila locala;
+			movl 8(%ebp), %esi
+			movl (%esi, %eax, 4), %ebx
+			movl %ebx, -32(%ebp)
+			
+			
+			// Aflam pozitia c * n + b a elementului din m2;
+			movl -24(%ebp), %eax
+			xor %edx, %edx
+			mull 20(%ebp)
+			addl -20(%ebp), %eax
+			
+			// Stocam elementul intr-o variabila locala;
+			movl 12(%ebp), %esi
+			movl (%esi, %eax, 4), %ebx
+			movl %ebx, -36(%ebp)
+			
+			
+			// Calculam -32(%ebp) * -36(%ebp) si il adaugam in -28(%ebp);
+			movl -32(%ebp), %eax
+			xor %edx, %edx
+			mull -36(%ebp)
+			addl %eax, -28(%ebp)
 			
 			
 			incl -24(%ebp)
 			jmp for_c
 		
 		exit_for_c:
+		
+		
+		// Aflam pozitia a * n + b a elementului din mres;
+		movl -16(%ebp), %eax
+		xor %edx, %edx
+		mull 20(%ebp)
+		addl -20(%ebp), %eax
+		
+		// Mutam -28(%ebp) in mres[a][b];
+		movl 16(%ebp), %esi
+		movl -28(%ebp), %ebx
+		movl %ebx, (%esi, %eax, 4)
+		
 		
 		incl -20(%ebp)
 		jmp for_b
@@ -107,7 +149,7 @@ exit_for_a:
 	
 	popl %ebp
 	ret
-	
+/////////////////////////	
 
 .globl main
 main:
@@ -340,6 +382,78 @@ for_k:
 		pushl %esi
 		pushl %ebx
 	
+	// Copiem matricea mres inapoi in m1;
+	movl $0, ii
+	movl $0, jj
+	xor %ecx, %ecx
+	xor %edx, %edx
+	
+	for_1_mres:
+		movl ii, %ecx
+		cmp n, %ecx
+		je exit_for_1_mres
+		
+		
+		movl $0, jj
+		for_2_mres:
+			movl jj, %ecx
+			cmp n, %ecx
+			je exit_for_2_mres
+			
+			
+			// Aflam pozitia ii * n + jj din matricea mres;
+			movl ii, %eax
+			xor %edx, %edx
+			mull n
+			addl jj, %eax
+			
+			// Copiem mres[ii][jj] in m1[ii][jj];
+			lea mres, %esi
+			movl (%esi, %eax, 4), %ebx
+			
+			lea m1, %esi
+			movl %ebx, (%esi, %eax, 4)
+			
+			////
+			pushl (%esi, %eax, 4)
+			pushl $fpr
+			call printf
+			addl $8, %esp
+			
+			pushl $0
+			call fflush
+			addl $4, %esp
+			////
+			
+			incl jj
+			jmp for_2_mres
+		
+		exit_for_2_mres:
+		
+		////
+		pushl $fen
+		call printf
+		addl $4, %esp
+		
+		pushl $0
+		call fflush
+		addl $4, %esp
+		////
+		
+		incl ii
+		jmp for_1_mres
+	
+
+	exit_for_1_mres:
+
+	////
+	pushl $fen
+	call printf
+	addl $4, %esp
+		
+	pushl $0
+	call fflush
+	addl $4, %esp
 	////
 
 	decl k
@@ -347,6 +461,25 @@ for_k:
 
 
 exit_for_k:
+
+// Calculam pozitia i * n + j in m1 si afisam m1[i][j] sa aflam raspunsul final;
+	movl i, %eax
+	xor %edx, %edx
+	mull n
+	addl j, %eax
+	
+	lea m1, %esi
+	
+// Afisam nr. de drumuri de lungime k de la nodul i la nodul j;	
+
+	pushl (%esi, %eax, 4)
+	pushl $f2
+	call printf
+	addl $8, %esp
+	
+	pushl $0
+	call fflush
+	addl $4, %esp
 	
 etexit:
 	movl $1, %eax
