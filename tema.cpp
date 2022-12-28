@@ -113,11 +113,11 @@ int main()
 					x = mres[ii][jj];
 					m1[ii][jj] = x;
 					
-					cout << m1[ii][jj] << " ";//
+					// cout << m1[ii][jj] << " ";///
 				}
-				cout << endl;//
+				// cout << endl;///
 			}
-			cout << endl;//
+			// cout << endl;///
 			
 			k--;
 		}

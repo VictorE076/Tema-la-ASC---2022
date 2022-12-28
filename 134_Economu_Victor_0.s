@@ -414,31 +414,14 @@ for_k:
 			lea m1, %esi
 			movl %ebx, (%esi, %eax, 4)
 			
-			////
-			pushl (%esi, %eax, 4)
-			pushl $fpr
-			call printf
-			addl $8, %esp
 			
-			pushl $0
-			call fflush
-			addl $4, %esp
-			////
 			
 			incl jj
 			jmp for_2_mres
 		
 		exit_for_2_mres:
 		
-		////
-		pushl $fen
-		call printf
-		addl $4, %esp
 		
-		pushl $0
-		call fflush
-		addl $4, %esp
-		////
 		
 		incl ii
 		jmp for_1_mres
@@ -446,16 +429,7 @@ for_k:
 
 	exit_for_1_mres:
 
-	////
-	pushl $fen
-	call printf
-	addl $4, %esp
-		
-	pushl $0
-	call fflush
-	addl $4, %esp
-	////
-
+	
 	decl k
 	jmp for_k
 
@@ -537,5 +511,38 @@ etexit:
 	addl $4, %esp
 */
 
+/////////////////////
 
+/*
+			pushl (%esi, %eax, 4)
+			pushl $fpr
+			call printf
+			addl $8, %esp
 			
+			pushl $0
+			call fflush
+			addl $4, %esp
+*/
+
+
+/*
+		pushl $fen
+		call printf
+		addl $4, %esp
+		
+		pushl $0
+		call fflush
+		addl $4, %esp
+*/
+
+
+/*
+	pushl $fen
+	call printf
+	addl $4, %esp
+		
+	pushl $0
+	call fflush
+	addl $4, %esp
+*/
+		
